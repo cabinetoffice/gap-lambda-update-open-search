@@ -1,0 +1,13 @@
+{
+  "name": "gap-lambda-update-open-search",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "repository": "git@github.com:cabinetoffice/gap-lambda-update-open-search.git",
+  "author": "dylan.wright@cabinetoffice.gov.uk",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "contentful-management": "^11.25.0",
+    "node-fetch": "^3.3.2"
+  }
+}
