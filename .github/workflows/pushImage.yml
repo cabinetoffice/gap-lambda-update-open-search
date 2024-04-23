@@ -28,7 +28,6 @@ jobs:
         with:
           node-version: ${{ env.node-version }}
       - run: npm install
-      - run: npm build
 
   imageBuild:
     needs: build
@@ -69,7 +68,6 @@ jobs:
           echo BUILD_VERSION is ${{ env.BUILD_VERSION }}
 
       - run: npm install
-      - run: npm build
 
       - name: Build, tag and push Docker image to AWS ECR
         env:
