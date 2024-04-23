@@ -5,7 +5,7 @@ const openSearchConfig = {
   username: process.env.OPEN_SEARCH_USERNAME,
   password: process.env.OPEN_SEARCH_PASSWORD,
   url: process.env.OPEN_SEARCH_URL,
-  indexUri: process.env.OPEN_SEARCH_INDEX_URI,
+  domain: process.env.OPEN_SEARCH_DOMAIN,
 };
 
 const contentfulConfig = {
@@ -47,8 +47,7 @@ const getGrantById = async (contentfulEntryId) => {
 const updateElasticIndex = async (contentfulEntry, action) => {
   const auth = openSearchConfig.username + ':' + openSearchConfig.password;
   const authHeader = 'Basic ' + btoa(auth);
-  const url =
-    openSearchConfig.url + openSearchConfig.indexUri + contentfulEntry.sys.id;
+  const url = `${openSearchConfig.url}${openSearchConfig.domain}/_doc/${contentfulEntry.sys.id}`;
 
   const ACTIONS = {
     ADD: 'PUT',
