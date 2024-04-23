@@ -28,6 +28,5 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.node-version }}
-      - run: yarn install
-      - run: yarn build
-      - run: yarn jest
+      - run: npm install
+      - run: npm build
