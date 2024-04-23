@@ -7,4 +7,4 @@ COPY index.mjs package.json ./
 RUN npm install --production
 
 # Start the application
-CMD ["index.handler"]
+CMD ["index.mjs"]
