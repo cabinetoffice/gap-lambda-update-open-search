@@ -90,14 +90,17 @@ export const handler = async (data) => {
   console.log('Data: ', data);
   for (const record of data.Records) {
     console.log(record);
-    if (!record.body || !record.body.contentfulEntryId || !record.body.type)
+
+    const message = JSON.parse(record?.body);
+    if (!message.contentfulEntryId || !message.type) {
+      console.log(`Invalid Message: ${message}`);
       throw new Error(`Invalid Message: ${record.body}`);
+    }
 
-    const contentfulEntryId = record.body.contentfulEntryId;
-    console.log(`contentful entry ID: ${record.body.contentfulEntryId}`);
-    console.log(`action: ${message.type}`);
+    console.log(`contentful entry ID: ${message.contentfulEntryId}`);
+    console.log(`type: ${message.type}`);
 
-    const grant = await getGrantById(contentfulEntryId);
+    const grant = await getGrantById(message.contentfulEntryId);
     await updateElasticIndex(grant, message.type);
 
     return { statusCode: 200 };
