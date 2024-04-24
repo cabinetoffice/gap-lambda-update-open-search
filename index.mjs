@@ -87,13 +87,18 @@ const updateElasticIndex = async (contentfulEntry, action) => {
 };
 
 export const handler = async (message) => {
-  console.log(message);
-  const contentfulEntryId = message.contentfulEntryId;
-  console.log(`contentful entry ID: ${message.contentfulEntryId}`);
-  console.log(`action: ${message.type}`);
+  for (record of messages.Records) {
+    console.log('Message Recieved: ', message);
+    if (!record.body || !record.body.contentfulEntryId || !record.body.type)
+      throw new Error(`Invalid Message: ${record.body}`);
 
-  const grant = await getGrantById(contentfulEntryId);
-  await updateElasticIndex(grant, message.type);
+    const contentfulEntryId = record.body.contentfulEntryId;
+    console.log(`contentful entry ID: ${record.body.contentfulEntryId}`);
+    console.log(`action: ${message.type}`);
 
-  return { statusCode: 200 };
+    const grant = await getGrantById(contentfulEntryId);
+    await updateElasticIndex(grant, message.type);
+
+    return { statusCode: 200 };
+  }
 };
