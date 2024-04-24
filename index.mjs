@@ -86,8 +86,9 @@ const updateElasticIndex = async (contentfulEntry, action) => {
   }
 };
 
-export const handler = async (messages) => {
-  for (record of messages.Records) {
+export const handler = async (records) => {
+  console.log('Records: ', records);
+  for (record of records) {
     console.log('Message Recieved: ', message);
     if (!record.body || !record.body.contentfulEntryId || !record.body.type)
       throw new Error(`Invalid Message: ${record.body}`);
