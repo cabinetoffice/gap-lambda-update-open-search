@@ -47,6 +47,8 @@ const getGrantById = async (contentfulEntryId) => {
 };
 
 const updateElasticIndex = async (contentfulEntry, action) => {
+  console.log(`contentful ID: ${contentfulEntry.sys.id}`);
+  console.log(`action: ${action}`);
   const auth = openSearchConfig.username + ':' + openSearchConfig.password;
   const authHeader = 'Basic ' + btoa(auth);
   const url = `${openSearchConfig.url}/${openSearchConfig.domain}/_doc/${contentfulEntry.sys.id}`;
@@ -87,6 +89,7 @@ const updateElasticIndex = async (contentfulEntry, action) => {
 };
 
 export const handler = async (message) => {
+  console.log(message);
   const contentfulEntryId = message.contentfulEntryId;
   const grant = await getGrantById(contentfulEntryId);
   await updateElasticIndex(grant, message.type);
