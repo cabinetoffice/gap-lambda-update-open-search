@@ -28,22 +28,14 @@ const client = contentful.createClient(
 );
 
 const getGrantById = async (contentfulEntryId) => {
-  const { items } = await client.entry.get({
-    query: {
-      'sys.id': contentfulEntryId,
-      content_type: 'grantDetails',
-    },
-  });
+  const grant = await client.entry.get({ entryId: contentfulEntryId });
 
-  if (!items || !items.length) {
+  if (!grant) {
     throw new Error(
       `No published grant found in contentful with id ${contentfulEntryId}`
     );
   }
-
-  // Should always return one result as the id is unique
-  console.log(`Found ${items.length} published grant(s) in contentful`);
-  return items[0];
+  return grant;
 };
 
 const updateElasticIndex = async (contentfulEntry, action) => {
@@ -89,8 +81,6 @@ const updateElasticIndex = async (contentfulEntry, action) => {
 export const handler = async (data) => {
   console.log('Data: ', data);
   for (const record of data.Records) {
-    console.log(record);
-
     const message = JSON.parse(record?.body);
     if (!message.contentfulEntryId || !message.type) {
       console.log(`Invalid Message: ${message}`);
