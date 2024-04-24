@@ -1,5 +1,5 @@
-import contentful from "contentful-management";
-import fetch from "node-fetch";
+import contentful from 'contentful-management';
+import fetch from 'node-fetch';
 
 const openSearchConfig = {
   username: process.env.OPEN_SEARCH_USERNAME,
@@ -19,7 +19,7 @@ const client = contentful.createClient(
     accessToken: contentfulConfig.accessToken,
   },
   {
-    type: "plain",
+    type: 'plain',
     defaults: {
       spaceId: contentfulConfig.spaceId,
       environmentId: contentfulConfig.environmentId,
@@ -30,8 +30,8 @@ const client = contentful.createClient(
 const getGrantById = async (contentfulEntryId) => {
   const { items } = await client.entry.getPublished({
     query: {
-      "sys.id": contentfulEntryId,
-      content_type: "grantDetails",
+      'sys.id': contentfulEntryId,
+      content_type: 'grantDetails',
     },
   });
 
@@ -47,13 +47,13 @@ const getGrantById = async (contentfulEntryId) => {
 };
 
 const updateElasticIndex = async (contentfulEntry, action) => {
-  const auth = openSearchConfig.username + ":" + openSearchConfig.password;
-  const authHeader = "Basic " + btoa(auth);
-  const url = `${openSearchConfig.url}${openSearchConfig.domain}/_doc/${contentfulEntry.sys.id}`;
+  const auth = openSearchConfig.username + ':' + openSearchConfig.password;
+  const authHeader = 'Basic ' + btoa(auth);
+  const url = `${openSearchConfig.url}/${openSearchConfig.domain}/_doc/${contentfulEntry.sys.id}`;
 
   const ACTIONS = {
-    ADD: "PUT",
-    REMOVE: "DELETE",
+    ADD: 'PUT',
+    REMOVE: 'DELETE',
   };
 
   const method = ACTIONS[action];
@@ -63,12 +63,12 @@ const updateElasticIndex = async (contentfulEntry, action) => {
   const body = JSON.stringify(contentfulEntry);
 
   console.log(
-    `Updating elastic index for grant ${contentfulEntry.fields.grantName["en-US"]}, with contentful entry: \n ${body}`
+    `Updating elastic index for grant ${contentfulEntry.fields.grantName['en-US']}, with contentful entry: \n ${body}`
   );
   const response = await fetch(url, {
     method: method,
     headers: {
-      "Content-Type": "application/json; charset=utf-8",
+      'Content-Type': 'application/json; charset=utf-8',
       Authorization: authHeader,
     },
     body: body,
@@ -81,7 +81,7 @@ const updateElasticIndex = async (contentfulEntry, action) => {
     );
   } else {
     console.log(
-      `Successfully updated elastic index for grant ${contentfulEntry.fields.grantName["en-US"]}`
+      `Successfully updated elastic index for grant ${contentfulEntry.fields.grantName['en-US']}`
     );
   }
 };
