@@ -55,7 +55,7 @@ const updateElasticIndex = async (contentfulEntry, action) => {
   const body = JSON.stringify(contentfulEntry);
 
   console.log(
-    `Updating elastic index for grant ${contentfulEntry.fields.grantName['en-US']}, with contentful entry: \n ${body}`
+    `Updating elastic index for grant: '${contentfulEntry.fields.grantName['en-US']}', with contentful entry: \n ${body}`
   );
   const response = await fetch(url, {
     method: method,
@@ -69,17 +69,17 @@ const updateElasticIndex = async (contentfulEntry, action) => {
   if (!response || !response.ok) {
     const errorMessage = await response.text();
     throw new Error(
-      `Failed to create an elastic index entry for ad ${contentfulEntry.sys.id} in open search: ${errorMessage}`
+      `Failed to create/delete an elastic index entry for ad: '${contentfulEntry.sys.id}' in open search: ${errorMessage}`
     );
   } else {
     console.log(
-      `Successfully updated elastic index for grant ${contentfulEntry.fields.grantName['en-US']}`
+      `${action} successful for elastic index for grant: '${contentfulEntry.fields.grantName['en-US']}'`
     );
   }
 };
 
 export const handler = async (data) => {
-  console.log('Data: ', data);
+  console.log('SQS Message: ', data);
   for (const record of data.Records) {
     const message = JSON.parse(record?.body);
     if (!message.contentfulEntryId || !message.type) {
