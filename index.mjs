@@ -1,5 +1,5 @@
-import fetch from 'node-fetch';
 import contentful from 'contentful-management';
+import fetch from 'node-fetch';
 
 const openSearchConfig = {
   username: process.env.OPEN_SEARCH_USERNAME,
@@ -28,26 +28,20 @@ const client = contentful.createClient(
 );
 
 const getGrantById = async (contentfulEntryId) => {
-  const { items } = await client.entry.getPublished({
-    query: {
-      'sys.id': contentfulEntryId,
-      content_type: 'grantDetails',
-    },
-  });
+  const grant = await client.entry.get({ entryId: contentfulEntryId });
 
-  if (!items || !items.length) {
-    throw new Error(`No published grant found in contentful with id ${id}`);
+  if (!grant) {
+    throw new Error(
+      `No published grant found in contentful with id ${contentfulEntryId}`
+    );
   }
-
-  // Should always return one result as the id is unique
-  console.log(`Found ${items.length} published grant(s) in contentful`);
-  return items[0];
+  return grant;
 };
 
 const updateElasticIndex = async (contentfulEntry, action) => {
   const auth = openSearchConfig.username + ':' + openSearchConfig.password;
   const authHeader = 'Basic ' + btoa(auth);
-  const url = `${openSearchConfig.url}${openSearchConfig.domain}/_doc/${contentfulEntry.sys.id}`;
+  const url = `${openSearchConfig.url}/${openSearchConfig.domain}/_doc/${contentfulEntry.sys.id}`;
 
   const ACTIONS = {
     ADD: 'PUT',
@@ -61,7 +55,7 @@ const updateElasticIndex = async (contentfulEntry, action) => {
   const body = JSON.stringify(contentfulEntry);
 
   console.log(
-    `Updating elastic index for grant ${contentfulEntry.fields.grantName['en-US']}, with contentful entry: \n ${body}`
+    `Updating elastic index for grant: '${contentfulEntry.fields.grantName['en-US']}', with contentful entry: \n ${body}`
   );
   const response = await fetch(url, {
     method: method,
@@ -75,19 +69,30 @@ const updateElasticIndex = async (contentfulEntry, action) => {
   if (!response || !response.ok) {
     const errorMessage = await response.text();
     throw new Error(
-      `Failed to create an elastic index entry for ad ${contentfulEntry.sys.id} in open search: ${errorMessage}`
+      `Failed to create/delete an elastic index entry for ad: '${contentfulEntry.sys.id}' in open search: ${errorMessage}`
     );
   } else {
     console.log(
-      `Successfully updated elastic index for grant ${contentfulEntry.fields.grantName['en-US']}`
+      `${action} successful for elastic index for grant: '${contentfulEntry.fields.grantName['en-US']}'`
     );
   }
 };
 
-export const handler = async (message) => {
-  const contentfulEntryId = message.contentfulEntryId;
-  const grant = await getGrantById(contentfulEntryId);
-  await updateElasticIndex(grant, message.type);
+export const handler = async (data) => {
+  console.log('SQS Message: ', data);
+  for (const record of data.Records) {
+    const message = JSON.parse(record?.body);
+    if (!message.contentfulEntryId || !message.type) {
+      console.log(`Invalid Message: ${message}`);
+      throw new Error(`Invalid Message: ${record.body}`);
+    }
 
-  return { statusCode: 200 };
+    console.log(`contentful entry ID: ${message.contentfulEntryId}`);
+    console.log(`type: ${message.type}`);
+
+    const grant = await getGrantById(message.contentfulEntryId);
+    await updateElasticIndex(grant, message.type);
+
+    return { statusCode: 200 };
+  }
 };
